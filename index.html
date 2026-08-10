@@ -1039,6 +1039,10 @@
   });
 
   function resetConversation() {
+    Object.keys(audioStore).forEach((k) => {
+      try { URL.revokeObjectURL(audioStore[k]); } catch (e) {}
+      delete audioStore[k];
+    });
     apiHistory = [];
     els.transcript.innerHTML = '';
     const mission = CONFIG.mode === 'mission' ? findMission(CONFIG.missionId) : null;
@@ -1083,7 +1087,7 @@
 
   // ---------- transcript rendering ----------
 
-  function addBubble({ who, es, en, correction, correctedEs, isError }) {
+  function addBubble({ who, es, en, correction, correctedEs, isError, id }) {
     els.emptyState.hidden = true;
     const div = document.createElement('div');
     div.className = 'bubble ' + who + (isError ? ' error' : '');
@@ -1092,13 +1096,13 @@
     } else if (who === 'review') {
       div.innerHTML = '<div class="summary">' + escapeHtml(es) + '</div>';
     } else {
-      const replayId = 't' + (++idCounter);
+      const replayId = id || ('t' + (++idCounter));
       textStore[replayId] = es;
       let html = '<div class="es">' + escapeHtml(es) + '</div>';
       if (!isError) {
         html += '<div class="replay-controls">'
-          + '<button class="mini-btn replay-btn" data-text-id="' + replayId + '" data-rate="0.95">🔊 Normal</button>'
-          + '<button class="mini-btn replay-btn" data-text-id="' + replayId + '" data-rate="0.6">🐢 Despacio</button>'
+          + '<button class="mini-btn replay-btn" data-text-id="' + replayId + '" data-rate="1">🔊 Normal</button>'
+          + '<button class="mini-btn replay-btn" data-text-id="' + replayId + '" data-rate="0.65">🐢 Despacio</button>'
           + '</div>';
       }
       if (en) html += '<div class="en">' + escapeHtml(en) + '</div>';
@@ -1109,7 +1113,7 @@
           textStore[drillId] = correctedEs;
           html += '<div class="drill-row">'
             + '<span class="drill-target">' + escapeHtml(correctedEs) + '</span>'
-            + '<button class="mini-btn replay-btn" data-text-id="' + drillId + '" data-rate="0.85">🔊</button>'
+            + '<button class="mini-btn replay-btn" data-text-id="' + drillId + '" data-rate="1">🔊</button>'
             + '<button class="mini-btn drill-repeat" data-text-id="' + drillId + '">🔁 Repetir</button>'
             + '</div><div class="drill-result"></div>';
         }
@@ -1125,8 +1129,10 @@
   els.transcript.addEventListener('click', (e) => {
     const replayBtn = e.target.closest('.replay-btn');
     if (replayBtn) {
-      const t = textStore[replayBtn.dataset.textId];
-      if (t) speak(t, parseFloat(replayBtn.dataset.rate) || 0.95);
+      const id = replayBtn.dataset.textId;
+      const t = textStore[id];
+      const rate = parseFloat(replayBtn.dataset.rate) || 1;
+      if (t) speakText(id, t, rate);
       return;
     }
     const repeatBtn = e.target.closest('.drill-repeat');
@@ -1255,11 +1261,12 @@ Respond ONLY with a JSON object, no markdown fences, no extra commentary, in exa
     try {
       const data = await callWorker(buildSystemPrompt(), historyBefore, text);
       const replyEs = data.reply_es || '…';
+      const replyId = 't' + (++idCounter);
       apiHistory.push({ role: 'model', text: replyEs });
-      addBubble({ who: 'bot', es: replyEs, en: data.translation_en, correction: data.correction, correctedEs: data.corrected_es });
+      addBubble({ who: 'bot', es: replyEs, en: data.translation_en, correction: data.correction, correctedEs: data.corrected_es, id: replyId });
       addVocabWords(data.new_words);
       setState('speaking', 'Hablando…');
-      await speak(replyEs);
+      await speakText(replyId, replyEs, 1);
       setState('idle', 'Toca para hablar');
     } catch (err) {
       addBubble({ who: 'bot', es: friendlyError(err), isError: true });
@@ -1269,6 +1276,82 @@ Respond ONLY with a JSON object, no markdown fences, no extra commentary, in exa
 
   // ---------- speech output ----------
 
+  const audioStore = {}; // id -> object URL of generated Gemini audio, cached to avoid re-fetching
+  let currentAudioEl = null;
+
+  function base64ToUint8Array(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+
+  function pcmToWavBlob(pcmBytes, sampleRate) {
+    const numChannels = 1;
+    const bitsPerSample = 16;
+    const byteRate = (sampleRate * numChannels * bitsPerSample) / 8;
+    const blockAlign = (numChannels * bitsPerSample) / 8;
+    const dataSize = pcmBytes.length;
+    const buffer = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(buffer);
+    function writeString(offset, str) { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); }
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + dataSize, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitsPerSample, true);
+    writeString(36, 'data');
+    view.setUint32(40, dataSize, true);
+    new Uint8Array(buffer, 44).set(pcmBytes);
+    return new Blob([buffer], { type: 'audio/wav' });
+  }
+
+  async function getGeminiAudioUrl(id, text) {
+    if (audioStore[id]) return audioStore[id];
+    if (!CONFIG.workerUrl) throw new Error('missing-worker-url');
+    const res = await fetch(CONFIG.workerUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'tts', text }),
+    });
+    if (!res.ok) throw new Error('tts-failed');
+    const data = await res.json();
+    if (!data.audio) throw new Error('tts-empty');
+    const pcmBytes = base64ToUint8Array(data.audio);
+    const blob = pcmToWavBlob(pcmBytes, data.sampleRate || 24000);
+    const url = URL.createObjectURL(blob);
+    audioStore[id] = url;
+    return url;
+  }
+
+  function playAudioUrl(url, rate) {
+    return new Promise((resolve) => {
+      if (currentAudioEl) { try { currentAudioEl.pause(); } catch (e) {} }
+      const audio = new Audio(url);
+      audio.playbackRate = rate || 1;
+      audio.preservesPitch = true;
+      currentAudioEl = audio;
+      audio.onended = resolve;
+      audio.onerror = resolve;
+      audio.play().catch(() => resolve());
+    });
+  }
+
+  async function speakText(id, text, rate) {
+    try {
+      const url = await getGeminiAudioUrl(id, text);
+      await playAudioUrl(url, rate);
+    } catch (err) {
+      await speakBrowser(text, rate);
+    }
+  }
+
   let voicesCache = [];
   function loadVoices() { voicesCache = speechSynthesis.getVoices(); }
   if ('speechSynthesis' in window) {
@@ -1276,7 +1359,7 @@ Respond ONLY with a JSON object, no markdown fences, no extra commentary, in exa
     if ('onvoiceschanged' in speechSynthesis) speechSynthesis.onvoiceschanged = loadVoices;
   }
 
-  function speak(text, rate) {
+  function speakBrowser(text, rate) {
     return new Promise((resolve) => {
       if (!('speechSynthesis' in window)) { resolve(); return; }
       const utter = new SpeechSynthesisUtterance(text);
@@ -1284,7 +1367,7 @@ Respond ONLY with a JSON object, no markdown fences, no extra commentary, in exa
       const preferred = voicesCache.find(v => v.lang === 'es-MX')
         || voicesCache.find(v => v.lang && v.lang.toLowerCase().startsWith('es'));
       if (preferred) utter.voice = preferred;
-      utter.rate = rate || 0.95;
+      utter.rate = rate ? rate * 0.95 : 0.95;
       utter.onend = resolve;
       utter.onerror = resolve;
       speechSynthesis.cancel();
