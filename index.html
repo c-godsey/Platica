@@ -1309,17 +1309,40 @@ Respond ONLY with a JSON object, no markdown fences, no extra commentary, in exa
       recognitionCallback = null;
       if (cb) cb(text);
     };
-    recognition.onerror = () => {
+    recognition.onerror = (e) => {
       recognitionCallback = null;
+      showRecognitionError(e.error);
       setState('idle', 'Toca para hablar');
     };
     recognition.onend = () => {
+      clearTimeout(listenWatchdog);
+      const hadPendingCallback = recognitionCallback !== null;
       recognitionCallback = null;
-      if (state === 'listening') setState('idle', 'Toca para hablar');
+      if (state === 'listening') {
+        setState('idle', 'Toca para hablar');
+        if (hadPendingCallback) {
+          addBubble({ who: 'bot', es: 'No logré captar lo que dijiste — a veces pasa en Safari. Intenta de nuevo, o usa el cuadro de texto de abajo.', isError: true });
+        }
+      }
     };
   } else {
     els.statusText.textContent = 'Tu navegador no soporta reconocimiento de voz — usa el cuadro de texto';
   }
+
+  function showRecognitionError(code) {
+    const messages = {
+      'not-allowed': 'El micrófono está bloqueado. Revisa los permisos del sitio en tu navegador (icono de candado junto a la URL) y permite el micrófono.',
+      'service-not-allowed': 'El micrófono está bloqueado. Revisa los permisos del sitio en tu navegador.',
+      'no-speech': 'No escuché nada. Intenta de nuevo, hablando un poco más fuerte o cerca del micrófono.',
+      'audio-capture': 'No se encontró un micrófono. Revisa que tu computadora o teléfono tenga uno conectado y disponible.',
+      'network': 'Problema de red con el reconocimiento de voz. Revisa tu conexión a internet.',
+      'aborted': null,
+    };
+    const msg = Object.prototype.hasOwnProperty.call(messages, code) ? messages[code] : ('Error de reconocimiento de voz: ' + code + '. Si esto sigue pasando, prueba desde https:// en vez de un archivo local.');
+    if (msg) addBubble({ who: 'bot', es: msg, isError: true });
+  }
+
+  let listenWatchdog = null;
 
   function startListening(lang, callback) {
     if (!recognition) { callback(''); return; }
@@ -1329,7 +1352,14 @@ Respond ONLY with a JSON object, no markdown fences, no extra commentary, in exa
     try {
       recognition.start();
       setState('listening', 'Escuchando…');
-    } catch (e) { recognitionCallback = null; }
+      clearTimeout(listenWatchdog);
+      listenWatchdog = setTimeout(() => {
+        if (state === 'listening') { try { recognition.stop(); } catch (e) {} }
+      }, 10000);
+    } catch (e) {
+      recognitionCallback = null;
+      addBubble({ who: 'bot', es: 'No se pudo activar el micrófono. Intenta de nuevo en unos segundos.', isError: true });
+    }
   }
 
   els.orbBtn.addEventListener('click', () => {
