@@ -1,0 +1,1380 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Plática — practica español mexicano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14171C;
+    --panel: #1B2027;
+    --panel-2: #242B34;
+    --marigold: #F0A202;
+    --magenta: #D6336C;
+    --teal: #12766B;
+    --cream: #F5EFE6;
+    --muted: #8B93A1;
+    --border: rgba(245, 239, 230, 0.08);
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: var(--font-body);
+    display: flex;
+    justify-content: center;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.3px;
+  }
+  .brand p {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .header-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .icon-btn:hover { background: var(--panel-2); }
+  .icon-btn:focus-visible,
+  button:focus-visible,
+  select:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--marigold);
+    outline-offset: 2px;
+  }
+  #vocabCount {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--magenta);
+    color: var(--cream);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1;
+    border-radius: 999px;
+    padding: 3px 5px;
+  }
+
+  .scenarios {
+    display: flex;
+    gap: 8px;
+    padding: 14px 20px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .chip {
+    flex-shrink: 0;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    cursor: pointer;
+  }
+  .chip.active {
+    color: var(--ink);
+    background: var(--marigold);
+    border-color: var(--marigold);
+    font-weight: 600;
+  }
+
+  .lesson-banner {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(240, 162, 2, 0.08);
+  }
+  .lesson-banner[hidden] { display: none; }
+  .lesson-banner-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--marigold);
+  }
+  .lesson-banner-top .text-btn { color: var(--teal); flex-shrink: 0; }
+  .lesson-words {
+    margin-top: 6px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    color: var(--cream);
+    line-height: 1.5;
+  }
+
+  .checklist { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    text-align: left;
+    cursor: pointer;
+    padding: 2px 0;
+  }
+  .check-box {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--muted);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+  .check-item.checked .check-box { background: var(--teal); border-color: var(--teal); }
+  .check-item.checked { color: var(--muted); text-decoration: line-through; }
+
+  .settings, .vocab, .lessons {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .settings[hidden], .vocab[hidden], .lessons[hidden] { display: none; }
+  .vocab, .lessons { max-height: 46vh; overflow-y: auto; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .field input, .field select {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 14px;
+  }
+  .settings { display: flex; flex-direction: column; gap: 12px; }
+  .settings-row { display: flex; gap: 10px; }
+  .settings-row .field { flex: 1; }
+  .text-btn {
+    background: none;
+    border: none;
+    color: var(--magenta);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    align-self: flex-start;
+    padding: 4px 0;
+  }
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+  }
+  .vocab-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .vocab-item:last-child { border-bottom: none; }
+  .v-es { font-family: var(--font-display); font-size: 15px; }
+  .v-en { color: var(--muted); font-size: 12px; text-align: right; }
+
+  .track-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin: 14px 0 6px;
+  }
+  .track-label:first-child { margin-top: 0; }
+
+  .lesson-list { display: flex; flex-direction: column; gap: 6px; }
+  .lesson-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+  }
+  .lesson-item.active { border-color: var(--marigold); }
+  .lesson-item.done .lesson-num { color: var(--teal); }
+  .lesson-num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    width: 18px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 20px 8px;
+    gap: 18px;
+    min-height: 0;
+  }
+
+  .orb-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0 2px;
+  }
+  .orb {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: none;
+    background: radial-gradient(circle at 35% 30%, var(--panel-2), var(--panel));
+    box-shadow: 0 0 0 1px var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .orb::before, .orb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--muted);
+    opacity: 0;
+  }
+  .orb-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s ease;
+  }
+  .orb.listening .orb-dot { background: var(--marigold); }
+  .orb.speaking .orb-dot { background: var(--teal); }
+  .orb.thinking .orb-dot { background: var(--magenta); }
+
+  .orb.listening::before, .orb.listening::after {
+    border-color: var(--marigold);
+    animation: pulse 1.6s ease-out infinite;
+  }
+  .orb.speaking::before, .orb.speaking::after {
+    border-color: var(--teal);
+    animation: pulse 1.6s ease-out infinite;
+  }
+  .orb.thinking::before {
+    border-color: var(--magenta);
+    border-style: dashed;
+    animation: spin 1.4s linear infinite;
+  }
+  .orb.listening::after, .orb.speaking::after { animation-delay: 0.5s; }
+
+  @keyframes pulse {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .orb::before, .orb::after { animation: none !important; }
+  }
+
+  .status {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .transcript {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 8px;
+    min-height: 120px;
+  }
+  .empty-state {
+    margin: auto;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 280px;
+    line-height: 1.6;
+  }
+  .empty-state.small { margin: 8px auto; font-size: 13px; }
+  .bubble {
+    max-width: 84%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    line-height: 1.4;
+  }
+  .bubble.user {
+    align-self: flex-end;
+    background: var(--panel-2);
+    border-bottom-right-radius: 4px;
+  }
+  .bubble.bot {
+    align-self: flex-start;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+  .bubble.review {
+    align-self: center;
+    background: rgba(18, 118, 107, 0.15);
+    border: 1px solid var(--teal);
+    max-width: 100%;
+  }
+  .bubble .es {
+    font-family: var(--font-display);
+    font-size: 17px;
+  }
+  .bubble .en {
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .bubble .summary {
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .bubble .correction {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    font-size: 12.5px;
+  }
+  .bubble .correction-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--magenta);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .bubble.error { border-color: var(--magenta); }
+
+  .replay-controls { display: flex; gap: 6px; margin-top: 6px; }
+  .mini-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--cream);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+  }
+  .mini-btn:hover { background: var(--panel-2); }
+
+  .drill-row {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .drill-target { font-family: var(--font-display); font-size: 14px; }
+  .drill-result { margin-top: 6px; font-size: 12px; color: var(--muted); }
+  .drill-result.ok { color: var(--teal); }
+  .drill-result.retry { color: var(--magenta); }
+
+  .composer {
+    display: flex;
+    gap: 8px;
+    padding: 10px 20px 10px;
+  }
+  .composer input {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: var(--font-body);
+  }
+  .composer button {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    padding: 0 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    text-transform: uppercase;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 20px 20px;
+    gap: 10px;
+  }
+  .toolbar button {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    cursor: pointer;
+  }
+  .toolbar button:hover { background: var(--panel-2); }
+  #langToggle { min-width: 52px; text-align: center; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <h1>Plática</h1>
+      <p>Español mexicano · en voz alta</p>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="missionsBtn" aria-label="Misiones" title="Misiones">🎯</button>
+      <button class="icon-btn" id="vocabBtn" aria-label="Vocabulario" title="Vocabulario">📖<span id="vocabCount" hidden></span></button>
+      <button class="icon-btn" id="settingsBtn" aria-label="Configuración" title="Configuración">⚙</button>
+    </div>
+  </header>
+
+  <div class="scenarios" id="scenarioBar">
+    <button class="chip active" data-scenario="free">Libre</button>
+    <button class="chip" data-scenario="taqueria">Taquería</button>
+    <button class="chip" data-scenario="hiking">Excursión</button>
+    <button class="chip" data-scenario="rio">Río</button>
+    <button class="chip" data-scenario="gym">Gimnasio</button>
+  </div>
+
+  <div class="lesson-banner" id="missionBanner" hidden>
+    <div class="lesson-banner-top">
+      <span id="missionTitle"></span>
+      <button class="text-btn" id="missionCompleteBtn">Terminar misión</button>
+    </div>
+    <div class="lesson-words" id="missionPhrases"></div>
+    <div class="checklist" id="missionChecklist"></div>
+  </div>
+
+  <section class="settings" id="settingsPanel" hidden>
+    <div class="field">
+      <label for="workerUrl">URL de tu Cloudflare Worker</label>
+      <input type="text" id="workerUrl" placeholder="https://tu-worker.workers.dev" />
+    </div>
+    <p class="hint">Debe tener GEMINI_API_KEY configurado y ALLOWED_ORIGINS con esta página incluida.</p>
+    <div class="settings-row">
+      <div class="field">
+        <label for="levelSelect">Nivel</label>
+        <select id="levelSelect">
+          <option value="beginner">Principiante</option>
+          <option value="basics">Bases sencillas</option>
+          <option value="conversational">Conversacional</option>
+          <option value="intermediate">Intermedio</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="correctionSelect">Correcciones</label>
+        <select id="correctionSelect">
+          <option value="often">Seguido</option>
+          <option value="major">Solo errores grandes</option>
+          <option value="end">Al final</option>
+        </select>
+      </div>
+    </div>
+    <button class="text-btn" id="clearBtn">Borrar conversación</button>
+  </section>
+
+  <section class="vocab" id="vocabPanel" hidden>
+    <div class="panel-header">
+      <span>Vocabulario</span>
+      <button class="text-btn" id="clearVocabBtn">Borrar lista</button>
+    </div>
+    <div class="vocab-list" id="vocabList">
+      <div class="empty-state small">Las palabras nuevas van a aparecer aquí.</div>
+    </div>
+  </section>
+
+  <section class="lessons" id="missionsPanel" hidden>
+    <div class="panel-header"><span>Misiones · práctica del mundo real</span></div>
+    <div class="lesson-list" id="missionsList"></div>
+  </section>
+
+  <main>
+    <div class="orb-wrap">
+      <button class="orb idle" id="orbBtn" aria-label="Toca para hablar">
+        <span class="orb-dot"></span>
+      </button>
+      <div class="status" id="statusText">Toca para hablar</div>
+    </div>
+
+    <div class="transcript" id="transcript">
+      <div class="empty-state" id="emptyState">Toca el círculo y saluda en español. Empieza con algo sencillo, como "Hola, ¿cómo estás?"</div>
+    </div>
+  </main>
+
+  <div class="composer">
+    <input type="text" id="textInput" placeholder="O escribe aquí…" />
+    <button id="sendBtn">Enviar</button>
+  </div>
+
+  <div class="toolbar">
+    <button id="reviewBtn">Revisar mi español</button>
+    <button id="langToggle" title="Idioma del micrófono">ES</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const CONFIG = {
+    workerUrl: 'https://fancy-mud-54e7.christiangodsey.workers.dev', // set in Settings if you ever need to change it
+    level: 'beginner',
+    correction: 'often',
+    micLang: 'es-MX',
+    mode: 'scenario', // 'scenario' | 'mission'
+    scenario: 'free',
+    missionId: null,
+  };
+
+  const SCENARIOS = {
+    free: {
+      context: '',
+      empty: 'Toca el círculo y saluda en español. Empieza con algo sencillo, como "Hola, ¿cómo estás?"',
+    },
+    taqueria: {
+      context: 'Role-play as a friendly taco stand vendor (taquero) in Mexico City. Greet the learner, ask what they would like to order, and describe menu items simply if asked (tacos al pastor, bistec, quesadillas, salsa verde or roja). Keep the conversation centered on ordering food.',
+      empty: 'Estás en una taquería. Saluda al taquero y pide algo, por ejemplo: "Buenas, ¿me da dos tacos al pastor?"',
+    },
+    hiking: {
+      context: 'Role-play as a hiking companion chatting with the learner before a hike in the mountains. Talk about trail conditions, weather, what to bring, and simple trail small talk.',
+      empty: 'Estás por salir de excursión. Saluda y platica sobre la caminata, por ejemplo: "Hola, ¿cómo está el sendero hoy?"',
+    },
+    rio: {
+      context: 'Role-play as a local at a river chatting with the learner, who is a fly fisherman. Talk about the river, the water, and simple fishing small talk, using accessible everyday vocabulary rather than technical jargon.',
+      empty: 'Estás junto al río, listo para pescar. Saluda y platica del río, por ejemplo: "Hola, ¿cómo está el río hoy?"',
+    },
+    gym: {
+      context: 'Role-play as a workout buddy at a gym (gimnasio) chatting with the learner before or during a workout: simple talk about exercises, how they are feeling, and encouragement.',
+      empty: 'Estás en el gimnasio. Saluda y platica del entrenamiento, por ejemplo: "¿Qué onda? ¿Qué vas a entrenar hoy?"',
+    },
+  };
+
+  const TRACKS = {
+    basico: 'Lo esencial',
+    rio_montana: 'Río y montaña',
+    gimnasio: 'Gimnasio',
+    social: 'La vida social',
+  };
+
+  // Each mission is a real-world speaking task, not a grammar topic. The point is to
+  // accomplish something through conversation, in natural spoken Mexican Spanish.
+  const MISSIONS = [
+    {
+      id: 'presentarte',
+      track: 'basico',
+      title: 'Preséntate y platica un poco',
+      objective: 'Help the learner introduce themselves in a natural way: give their name, say where they are from, and make a little small talk, as if meeting someone for the first time.',
+      keyPhrases: [
+        { es: 'hola, mucho gusto', en: 'hi, nice to meet you' },
+        { es: 'me llamo...', en: 'my name is...' },
+        { es: 'soy de...', en: 'I am from...' },
+        { es: '¿y tú?', en: 'and you?' },
+        { es: 'qué bien', en: 'that is great' },
+      ],
+      successCriteria: ['Dijiste tu nombre', 'Dijiste de dónde eres', 'Le preguntaste algo a la otra persona'],
+      intro: 'Vas a conocer a alguien por primera vez. Empieza, por ejemplo: "Hola, mucho gusto, me llamo..."',
+    },
+    {
+      id: 'pedircomida',
+      track: 'basico',
+      title: 'Pide de comer y paga',
+      objective: 'Help the learner order at least two food or drink items at a taquería or restaurant, ask what is included or recommended, and ask for the check at the end — entirely in Spanish.',
+      keyPhrases: [
+        { es: '¿me puede recomendar algo?', en: 'can you recommend something?' },
+        { es: 'quisiera...', en: 'I would like...' },
+        { es: '¿algo de tomar?', en: 'anything to drink?' },
+        { es: '¿me trae la cuenta, por favor?', en: 'can you bring me the check, please?' },
+        { es: 'para llevar', en: 'to go' },
+      ],
+      successCriteria: ['Pediste al menos dos cosas', 'Preguntaste algo sobre el menú', 'Pediste la cuenta'],
+      intro: 'Estás en una taquería con hambre. Saluda y empieza a pedir, por ejemplo: "Buenas, ¿qué me recomienda?"',
+    },
+    {
+      id: 'direcciones',
+      track: 'basico',
+      title: 'Pregunta cómo llegar',
+      objective: 'Help the learner ask a stranger for directions to a specific place, understand simple directions given in return, and confirm they understood.',
+      keyPhrases: [
+        { es: 'disculpe, ¿dónde está...?', en: 'excuse me, where is...?' },
+        { es: '¿está lejos?', en: 'is it far?' },
+        { es: 'siga derecho', en: 'go straight' },
+        { es: 'a la vuelta', en: 'around the corner' },
+        { es: 'muchas gracias', en: 'thank you very much' },
+      ],
+      successCriteria: ['Preguntaste por un lugar específico', 'Confirmaste que entendiste', 'Agradeciste'],
+      intro: 'Estás perdido y necesitas ayuda. Detén a alguien, por ejemplo: "Disculpe, ¿dónde está la farmacia?"',
+    },
+    {
+      id: 'llamada',
+      track: 'basico',
+      title: 'Haz una llamada',
+      objective: 'Help the learner make a simple phone call to book a table, confirm an appointment, or ask about hours, using polite phone phrases, entirely in Spanish.',
+      keyPhrases: [
+        { es: 'bueno', en: 'hello (answering the phone)' },
+        { es: 'quisiera reservar...', en: 'I would like to reserve...' },
+        { es: '¿a qué hora abren?', en: 'what time do you open?' },
+        { es: '¿tiene disponibilidad?', en: 'do you have availability?' },
+        { es: 'nos vemos', en: 'see you then' },
+      ],
+      successCriteria: ['Dijiste para qué llamabas', 'Preguntaste un detalle (hora, precio, etc.)', 'Confirmaste antes de colgar'],
+      intro: 'Vas a hacer una llamada rápida. Empieza, por ejemplo: "Bueno, buenas tardes, quisiera reservar una mesa."',
+    },
+    {
+      id: 'problema',
+      track: 'basico',
+      title: 'Resuelve un problema',
+      objective: 'Help the learner explain a simple everyday problem (something is broken, lost, or missing) and ask for help resolving it.',
+      keyPhrases: [
+        { es: 'tengo un problema', en: 'I have a problem' },
+        { es: 'se me perdió...', en: 'I lost...' },
+        { es: 'no funciona', en: 'it does not work' },
+        { es: '¿me puede ayudar?', en: 'can you help me?' },
+      ],
+      successCriteria: ['Explicaste el problema con claridad', 'Pediste ayuda', 'Entendiste la respuesta'],
+      intro: 'Algo salió mal y necesitas ayuda. Empieza, por ejemplo: "Disculpe, tengo un problema."',
+    },
+    {
+      id: 'condicionesrio',
+      track: 'rio_montana',
+      title: 'Pregunta por el río',
+      objective: 'Role-play as a local fishing guide. Help the learner ask about current river conditions, water level, and what is biting, using everyday accessible language rather than technical jargon.',
+      keyPhrases: [
+        { es: '¿cómo está el río hoy?', en: 'how is the river today?' },
+        { es: 'el agua está alta/baja', en: 'the water is high/low' },
+        { es: '¿qué está picando?', en: 'what is biting?' },
+        { es: '¿hay algún lugar bueno cerca?', en: 'is there a good spot nearby?' },
+      ],
+      successCriteria: ['Preguntaste por las condiciones del río', 'Preguntaste qué está picando', 'Pediste una recomendación de lugar'],
+      intro: 'Vas a platicar con un guía local antes de pescar. Empieza, por ejemplo: "Buenos días, ¿cómo está el río hoy?"',
+    },
+    {
+      id: 'antesexcursion',
+      track: 'rio_montana',
+      title: 'Antes de la excursión',
+      objective: 'Role-play as a hiking companion or local. Help the learner ask about trail conditions, weather, and what to bring before a hike.',
+      keyPhrases: [
+        { es: '¿cómo está el sendero?', en: 'how is the trail?' },
+        { es: '¿va a llover?', en: 'is it going to rain?' },
+        { es: '¿qué debo llevar?', en: 'what should I bring?' },
+        { es: '¿cuánto se tarda?', en: 'how long does it take?' },
+      ],
+      successCriteria: ['Preguntaste por el clima', 'Preguntaste qué llevar', 'Preguntaste cuánto tiempo toma'],
+      intro: 'Vas a salir de excursión. Empieza, por ejemplo: "Hola, ¿cómo está el clima para hoy?"',
+    },
+    {
+      id: 'compraequipo',
+      track: 'rio_montana',
+      title: 'Compra equipo',
+      objective: 'Role-play as a shopkeeper selling outdoor or fishing gear. Help the learner ask if an item is available, its price, and whether there is anything else recommended.',
+      keyPhrases: [
+        { es: '¿tiene...?', en: 'do you have...?' },
+        { es: '¿cuánto cuesta?', en: 'how much does it cost?' },
+        { es: '¿tiene otro color o talla?', en: 'do you have another color or size?' },
+        { es: 'me lo llevo', en: 'I will take it' },
+      ],
+      successCriteria: ['Preguntaste si tenían el producto', 'Preguntaste el precio', 'Decidiste si comprarlo'],
+      intro: 'Necesitas equipo para tu próxima aventura. Empieza, por ejemplo: "Hola, ¿tiene moscas para pesca?"',
+    },
+    {
+      id: 'platicaaireLibre',
+      track: 'rio_montana',
+      title: 'Platica con otro aventurero',
+      objective: 'Role-play as a fellow fisherman or hiker met on the trail or riverbank. Help the learner make natural small talk: where they are from, how the day is going, and swap a tip or two.',
+      keyPhrases: [
+        { es: '¿qué tal el día?', en: 'how is the day going?' },
+        { es: '¿de dónde eres?', en: 'where are you from?' },
+        { es: '¿algún consejo?', en: 'any tips?' },
+        { es: 'buena suerte', en: 'good luck' },
+      ],
+      successCriteria: ['Hiciste una pregunta sobre su día', 'Compartiste algo tuyo', 'Te despediste bien'],
+      intro: 'Te encuentras a otra persona en el río o el sendero. Empieza, por ejemplo: "¡Qué buen día! ¿Cómo va todo?"',
+    },
+    {
+      id: 'antesentrenar',
+      track: 'gimnasio',
+      title: 'Platica antes de entrenar',
+      objective: 'Role-play as a workout buddy at the gym. Help the learner make small talk about what they are training today and how they are feeling.',
+      keyPhrases: [
+        { es: '¿qué vas a entrenar hoy?', en: 'what are you training today?' },
+        { es: 'estoy adolorido', en: 'I am sore' },
+        { es: 'vamos con todo', en: 'let us go all out' },
+        { es: 'una más', en: 'one more' },
+      ],
+      successCriteria: ['Dijiste qué ibas a entrenar', 'Preguntaste algo a la otra persona', 'Usaste una frase de ánimo'],
+      intro: 'Estás en el gimnasio antes de entrenar. Empieza, por ejemplo: "¿Qué onda? ¿Qué vas a entrenar hoy?"',
+    },
+    {
+      id: 'membresia',
+      track: 'gimnasio',
+      title: 'Pregunta por una clase',
+      objective: 'Role-play as gym front-desk staff. Help the learner ask about class schedules, membership cost, or trial options.',
+      keyPhrases: [
+        { es: '¿tienen clases de...?', en: 'do you have classes of...?' },
+        { es: '¿cuánto cuesta la membresía?', en: 'how much does membership cost?' },
+        { es: '¿puedo probar una clase?', en: 'can I try a class?' },
+      ],
+      successCriteria: ['Preguntaste por una clase específica', 'Preguntaste el precio', 'Preguntaste el horario'],
+      intro: 'Quieres inscribirte a una clase. Empieza, por ejemplo: "Hola, ¿tienen clases de kettlebell?"',
+    },
+    {
+      id: 'lesion',
+      track: 'gimnasio',
+      title: 'Habla de cómo te sientes',
+      objective: 'Help the learner describe how their body feels after training, including a minor ache or injury, and ask for simple advice.',
+      keyPhrases: [
+        { es: 'me duele el hombro', en: 'my shoulder hurts' },
+        { es: '¿desde cuándo?', en: 'since when?' },
+        { es: 'debería descansar', en: 'I should rest' },
+        { es: '¿qué me recomienda?', en: 'what do you recommend?' },
+      ],
+      successCriteria: ['Dijiste qué te duele', 'Diste un detalle (cuándo, cómo)', 'Pediste una recomendación'],
+      intro: 'Algo te duele después de entrenar. Empieza, por ejemplo: "Me duele el hombro desde ayer."',
+    },
+    {
+      id: 'conocergente',
+      track: 'social',
+      title: 'Conoce a alguien nuevo',
+      objective: 'Help the learner meet someone new: exchange names, ask what they do, and find something in common, in natural conversational Spanish.',
+      keyPhrases: [
+        { es: 'mucho gusto', en: 'nice to meet you' },
+        { es: '¿a qué te dedicas?', en: 'what do you do for work?' },
+        { es: 'qué padre', en: 'that is cool' },
+        { es: 'deberíamos...', en: 'we should...' },
+      ],
+      successCriteria: ['Te presentaste', 'Preguntaste algo sobre la otra persona', 'Sugeriste algo'],
+      intro: 'Conoces a alguien en una reunión. Empieza, por ejemplo: "Hola, mucho gusto, me llamo..."',
+    },
+    {
+      id: 'llamadaamigo',
+      track: 'social',
+      title: 'Ponte al día con un amigo',
+      objective: 'Help the learner have a casual catch-up phone call with a friend: ask how they are, share news, and make loose plans.',
+      keyPhrases: [
+        { es: '¿qué onda?', en: 'what is up?' },
+        { es: '¿cómo va todo?', en: 'how is everything going?' },
+        { es: 'deberíamos vernos', en: 'we should get together' },
+        { es: 'te marco luego', en: 'I will call you later' },
+      ],
+      successCriteria: ['Preguntaste cómo está', 'Compartiste algo tuyo', 'Propusiste un plan'],
+      intro: 'Le llamas a un amigo para saludar. Empieza, por ejemplo: "¿Qué onda? ¿Cómo has estado?"',
+    },
+  ];
+
+  const els = {
+    missionsBtn: document.getElementById('missionsBtn'),
+    missionsPanel: document.getElementById('missionsPanel'),
+    missionsList: document.getElementById('missionsList'),
+    missionBanner: document.getElementById('missionBanner'),
+    missionTitle: document.getElementById('missionTitle'),
+    missionPhrases: document.getElementById('missionPhrases'),
+    missionChecklist: document.getElementById('missionChecklist'),
+    missionCompleteBtn: document.getElementById('missionCompleteBtn'),
+    vocabBtn: document.getElementById('vocabBtn'),
+    vocabCount: document.getElementById('vocabCount'),
+    vocabPanel: document.getElementById('vocabPanel'),
+    vocabList: document.getElementById('vocabList'),
+    clearVocabBtn: document.getElementById('clearVocabBtn'),
+    scenarioBar: document.getElementById('scenarioBar'),
+    settingsBtn: document.getElementById('settingsBtn'),
+    settingsPanel: document.getElementById('settingsPanel'),
+    workerUrl: document.getElementById('workerUrl'),
+    levelSelect: document.getElementById('levelSelect'),
+    correctionSelect: document.getElementById('correctionSelect'),
+    clearBtn: document.getElementById('clearBtn'),
+    orbBtn: document.getElementById('orbBtn'),
+    statusText: document.getElementById('statusText'),
+    transcript: document.getElementById('transcript'),
+    emptyState: document.getElementById('emptyState'),
+    textInput: document.getElementById('textInput'),
+    sendBtn: document.getElementById('sendBtn'),
+    reviewBtn: document.getElementById('reviewBtn'),
+    langToggle: document.getElementById('langToggle'),
+  };
+
+  els.workerUrl.value = CONFIG.workerUrl;
+  els.levelSelect.value = CONFIG.level;
+  els.correctionSelect.value = CONFIG.correction;
+
+  let apiHistory = []; // {role: 'user'|'model', text}
+  let state = 'idle'; // idle | listening | thinking | speaking
+  let vocabList = []; // {es, en}
+  let completedMissions = new Set();
+  let checkedCriteria = new Set();
+  let idCounter = 0;
+  const textStore = {}; // id -> spanish text, used by replay/drill buttons
+
+  function setState(next, label) {
+    state = next;
+    els.orbBtn.className = 'orb ' + next;
+    els.statusText.textContent = label;
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str == null ? '' : String(str);
+    return d.innerHTML;
+  }
+
+  // ---------- panels ----------
+
+  function togglePanel(target) {
+    [els.settingsPanel, els.vocabPanel, els.missionsPanel].forEach((p) => { if (p !== target) p.hidden = true; });
+    target.hidden = !target.hidden;
+  }
+  els.settingsBtn.addEventListener('click', () => togglePanel(els.settingsPanel));
+  els.vocabBtn.addEventListener('click', () => togglePanel(els.vocabPanel));
+  els.missionsBtn.addEventListener('click', () => togglePanel(els.missionsPanel));
+
+  els.workerUrl.addEventListener('change', () => { CONFIG.workerUrl = els.workerUrl.value.trim(); });
+  els.levelSelect.addEventListener('change', () => { CONFIG.level = els.levelSelect.value; });
+  els.correctionSelect.addEventListener('change', () => { CONFIG.correction = els.correctionSelect.value; });
+  els.clearBtn.addEventListener('click', resetConversation);
+
+  // ---------- scenarios ----------
+
+  els.scenarioBar.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    const next = chip.dataset.scenario;
+    if (CONFIG.mode === 'scenario' && next === CONFIG.scenario) return;
+    if (apiHistory.length > 0) {
+      const ok = window.confirm('¿Cambiar de escena? Se borrará la conversación actual.');
+      if (!ok) return;
+    }
+    CONFIG.mode = 'scenario';
+    CONFIG.scenario = next;
+    CONFIG.missionId = null;
+    Array.prototype.forEach.call(els.scenarioBar.querySelectorAll('.chip'), (c) => c.classList.toggle('active', c === chip));
+    els.missionBanner.hidden = true;
+    renderMissions();
+    resetConversation();
+  });
+
+  // ---------- missions ----------
+
+  function findMission(id) { return MISSIONS.find((m) => m.id === id) || null; }
+
+  function renderMissions() {
+    let html = '';
+    let lastTrack = null;
+    MISSIONS.forEach((m, i) => {
+      if (m.track !== lastTrack) {
+        html += '<div class="track-label">' + escapeHtml(TRACKS[m.track] || m.track) + '</div>';
+        lastTrack = m.track;
+      }
+      const done = completedMissions.has(m.id);
+      const active = CONFIG.mode === 'mission' && CONFIG.missionId === m.id;
+      html += '<button class="lesson-item' + (active ? ' active' : '') + (done ? ' done' : '') + '" data-mission-id="' + m.id + '">'
+        + '<span class="lesson-num">' + (done ? '✓' : (i + 1)) + '</span>'
+        + '<span class="lesson-title">' + escapeHtml(m.title) + '</span>'
+        + '</button>';
+    });
+    els.missionsList.innerHTML = html;
+  }
+
+  function renderChecklist(mission) {
+    els.missionChecklist.innerHTML = mission.successCriteria.map((c, i) =>
+      '<button class="check-item' + (checkedCriteria.has(i) ? ' checked' : '') + '" data-idx="' + i + '">'
+      + '<span class="check-box"></span>' + escapeHtml(c) + '</button>'
+    ).join('');
+  }
+
+  els.missionChecklist.addEventListener('click', (e) => {
+    const item = e.target.closest('.check-item');
+    if (!item) return;
+    const idx = Number(item.dataset.idx);
+    if (checkedCriteria.has(idx)) checkedCriteria.delete(idx); else checkedCriteria.add(idx);
+    item.classList.toggle('checked');
+  });
+
+  function updateMissionBanner() {
+    const mission = findMission(CONFIG.missionId);
+    if (CONFIG.mode !== 'mission' || !mission) { els.missionBanner.hidden = true; return; }
+    els.missionBanner.hidden = false;
+    els.missionTitle.textContent = 'Misión ' + (MISSIONS.indexOf(mission) + 1) + ' · ' + mission.title;
+    els.missionPhrases.textContent = mission.keyPhrases.map((p) => p.es).join(' · ');
+    renderChecklist(mission);
+  }
+
+  els.missionsList.addEventListener('click', (e) => {
+    const item = e.target.closest('.lesson-item');
+    if (!item) return;
+    const id = item.dataset.missionId;
+    if (CONFIG.mode === 'mission' && CONFIG.missionId === id) { els.missionsPanel.hidden = true; return; }
+    if (apiHistory.length > 0) {
+      const ok = window.confirm('¿Cambiar de misión? Se borrará la conversación actual.');
+      if (!ok) return;
+    }
+    CONFIG.mode = 'mission';
+    CONFIG.missionId = id;
+    checkedCriteria = new Set();
+    Array.prototype.forEach.call(els.scenarioBar.querySelectorAll('.chip'), (c) => c.classList.remove('active'));
+    updateMissionBanner();
+    renderMissions();
+    resetConversation();
+    els.missionsPanel.hidden = true;
+  });
+
+  els.missionCompleteBtn.addEventListener('click', async () => {
+    if (CONFIG.mode !== 'mission' || !CONFIG.missionId) return;
+    const mission = findMission(CONFIG.missionId);
+    if (!mission) return;
+    if (apiHistory.length === 0) {
+      addBubble({ who: 'review', es: 'Todavía no has platicado nada en esta misión.' });
+      return;
+    }
+    completedMissions.add(CONFIG.missionId);
+    renderMissions();
+    setState('thinking', 'Revisando…');
+    const criteriaList = mission.successCriteria.map((c, i) => (i + 1) + '. ' + c).join(' ');
+    const debriefPrompt = 'You are a friendly Spanish conversation coach reviewing whether a learner completed a real-world speaking task. '
+      + 'The task was: ' + mission.objective + ' '
+      + 'Success looks like: ' + criteriaList + ' '
+      + 'Look at the conversation transcript and write a short, encouraging debrief in English: two to four sentences on how well they handled the task in natural spoken Spanish — focus on whether they communicated clearly and got the task done, not on grammar — plus one concrete tip for next time. '
+      + 'Respond ONLY with JSON in exactly this shape: {"summary": "your debrief text"}';
+    try {
+      const data = await callWorker(debriefPrompt, apiHistory, 'Please review how I did on this mission.');
+      addBubble({ who: 'review', es: data.summary || 'Bien hecho — misión completada.' });
+    } catch (err) {
+      addBubble({ who: 'review', es: friendlyError(err) });
+    }
+    setState('idle', 'Toca para hablar');
+  });
+
+  function resetConversation() {
+    apiHistory = [];
+    els.transcript.innerHTML = '';
+    const mission = CONFIG.mode === 'mission' ? findMission(CONFIG.missionId) : null;
+    els.emptyState.textContent = mission ? mission.intro : SCENARIOS[CONFIG.scenario].empty;
+    els.emptyState.hidden = false;
+    els.transcript.appendChild(els.emptyState);
+  }
+
+  // ---------- vocab ----------
+
+  function addVocabWords(words) {
+    if (!Array.isArray(words)) return;
+    let added = false;
+    words.forEach((w) => {
+      if (!w || !w.es) return;
+      const es = String(w.es).trim();
+      const en = String(w.en || '').trim();
+      if (!es) return;
+      const exists = vocabList.some((v) => v.es.toLowerCase() === es.toLowerCase());
+      if (!exists) { vocabList.unshift({ es, en }); added = true; }
+    });
+    if (added) renderVocab();
+  }
+
+  function renderVocab() {
+    if (vocabList.length) {
+      els.vocabCount.textContent = String(vocabList.length);
+      els.vocabCount.hidden = false;
+    } else {
+      els.vocabCount.hidden = true;
+    }
+    if (vocabList.length === 0) {
+      els.vocabList.innerHTML = '<div class="empty-state small">Las palabras nuevas van a aparecer aquí.</div>';
+      return;
+    }
+    els.vocabList.innerHTML = vocabList.map((v) =>
+      '<div class="vocab-item"><span class="v-es">' + escapeHtml(v.es) + '</span><span class="v-en">' + escapeHtml(v.en) + '</span></div>'
+    ).join('');
+  }
+
+  els.clearVocabBtn.addEventListener('click', () => { vocabList = []; renderVocab(); });
+
+  // ---------- transcript rendering ----------
+
+  function addBubble({ who, es, en, correction, correctedEs, isError }) {
+    els.emptyState.hidden = true;
+    const div = document.createElement('div');
+    div.className = 'bubble ' + who + (isError ? ' error' : '');
+    if (who === 'user') {
+      div.innerHTML = '<div class="es">' + escapeHtml(es) + '</div>';
+    } else if (who === 'review') {
+      div.innerHTML = '<div class="summary">' + escapeHtml(es) + '</div>';
+    } else {
+      const replayId = 't' + (++idCounter);
+      textStore[replayId] = es;
+      let html = '<div class="es">' + escapeHtml(es) + '</div>';
+      if (!isError) {
+        html += '<div class="replay-controls">'
+          + '<button class="mini-btn replay-btn" data-text-id="' + replayId + '" data-rate="0.95">🔊 Normal</button>'
+          + '<button class="mini-btn replay-btn" data-text-id="' + replayId + '" data-rate="0.6">🐢 Despacio</button>'
+          + '</div>';
+      }
+      if (en) html += '<div class="en">' + escapeHtml(en) + '</div>';
+      if (correction) {
+        html += '<div class="correction"><span class="correction-tag">Más natural</span>' + escapeHtml(correction);
+        if (correctedEs) {
+          const drillId = 'd' + (++idCounter);
+          textStore[drillId] = correctedEs;
+          html += '<div class="drill-row">'
+            + '<span class="drill-target">' + escapeHtml(correctedEs) + '</span>'
+            + '<button class="mini-btn replay-btn" data-text-id="' + drillId + '" data-rate="0.85">🔊</button>'
+            + '<button class="mini-btn drill-repeat" data-text-id="' + drillId + '">🔁 Repetir</button>'
+            + '</div><div class="drill-result"></div>';
+        }
+        html += '</div>';
+      }
+      div.innerHTML = html;
+    }
+    els.transcript.appendChild(div);
+    els.transcript.scrollTop = els.transcript.scrollHeight;
+    return div;
+  }
+
+  els.transcript.addEventListener('click', (e) => {
+    const replayBtn = e.target.closest('.replay-btn');
+    if (replayBtn) {
+      const t = textStore[replayBtn.dataset.textId];
+      if (t) speak(t, parseFloat(replayBtn.dataset.rate) || 0.95);
+      return;
+    }
+    const repeatBtn = e.target.closest('.drill-repeat');
+    if (repeatBtn) { startDrill(repeatBtn); return; }
+  });
+
+  // ---------- correction drill ----------
+
+  function normalizeEs(str) {
+    return str
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    const dp = [];
+    for (let i = 0; i <= m; i++) { dp.push(new Array(n + 1).fill(0)); dp[i][0] = i; }
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+    return dp[m][n];
+  }
+
+  function isCloseEnough(heard, target) {
+    const a = normalizeEs(heard || '');
+    const b = normalizeEs(target || '');
+    if (!a || !b) return false;
+    const dist = levenshtein(a, b);
+    const maxLen = Math.max(a.length, b.length);
+    return dist <= Math.max(2, Math.round(maxLen * 0.25));
+  }
+
+  function startDrill(button) {
+    if (state !== 'idle') return;
+    const target = textStore[button.dataset.textId];
+    if (!target) return;
+    const resultEl = button.closest('.drill-row').nextElementSibling;
+    resultEl.textContent = '';
+    resultEl.className = 'drill-result';
+    startListening('es-MX', (heard) => {
+      const ok = isCloseEnough(heard, target);
+      resultEl.textContent = ok ? 'Bien dicho.' : ('Casi. Intenta de nuevo: "' + target + '"');
+      resultEl.classList.add(ok ? 'ok' : 'retry');
+      setState('idle', 'Toca para hablar');
+    });
+  }
+
+  // ---------- Gemini prompt + calls ----------
+
+  function levelDescription() {
+    return {
+      beginner: 'a complete beginner who knows only a few isolated Spanish words',
+      basics: 'a beginner who knows common words and very simple phrases',
+      conversational: 'someone who can hold basic conversations but still makes frequent mistakes',
+      intermediate: 'an intermediate learner working toward fluency',
+    }[CONFIG.level];
+  }
+
+  function correctionInstruction() {
+    return {
+      often: 'When something the learner said would sound unnatural, unclear, or hard for a native speaker to follow, gently offer a more natural way to say it: set "correction" to a short, encouraging note in plain English (describe it the way a friend would, not a grammar teacher — avoid grammatical terminology), and "corrected_es" to a natural spoken version. If what they said was already clear and natural, even if not textbook-perfect, set both to null — small imperfections that do not affect understanding are not worth interrupting the flow for.',
+      major: 'Only step in when something would genuinely confuse a native speaker or change the meaning, setting "correction" and "corrected_es" for those; otherwise let smaller imperfections go, since the priority is keeping the learner talking, not correcting every detail.',
+      end: 'Do not correct mistakes during the conversation itself — always set "correction" and "corrected_es" to null. The learner will ask for a full review separately.',
+    }[CONFIG.correction];
+  }
+
+  function scenarioLine() {
+    const scenario = SCENARIOS[CONFIG.scenario];
+    return scenario && scenario.context ? ('\nScene: ' + scenario.context) : '';
+  }
+
+  function missionLine() {
+    const mission = findMission(CONFIG.missionId);
+    if (!mission) return '';
+    const phrases = mission.keyPhrases.map((p) => p.es).join(', ');
+    return `\nReal-world task: ${mission.objective} Useful phrases to work in naturally when they fit: ${phrases}. This is a speaking task, not a grammar lesson: prioritize helping the learner communicate and accomplish the task in natural spoken Mexican Spanish over correcting every detail. Keep steering the conversation toward completing the task, and bring it to a natural close once it is accomplished rather than dragging it out.`;
+  }
+
+  function buildSystemPrompt() {
+    const modeLine = CONFIG.mode === 'mission' ? missionLine() : scenarioLine();
+    return `You are "Platica," a warm, patient conversation partner helping a learner build real spoken confidence in Mexican Spanish (not Spain Spanish — favor Mexican vocabulary and natural expressions like "qué onda", "órale", and "padrísimo", used sparingly and only when natural, never forced). This app is about real-world speaking practice, not a grammar class: prioritize keeping the learner talking and understanding you over correcting every small imperfection.
+The learner is ${levelDescription()}. Keep every reply short: one to three simple, natural sentences in spoken Mexican Spanish appropriate to that level. End with a simple follow-up question to keep the conversation going.${modeLine}
+${correctionInstruction()}
+Also include up to three useful Spanish words or short phrases from your reply_es that are worth the learner remembering, each with a short English gloss, in "new_words" (use an empty array if nothing stands out).
+Respond ONLY with a JSON object, no markdown fences, no extra commentary, in exactly this shape:
+{"reply_es": "your spanish reply", "translation_en": "natural english translation of reply_es", "correction": "short encouraging note in plain English about a more natural way to say the most recent message, or null if nothing worth mentioning", "corrected_es": "a natural spoken version of the learner's most recent message, or null if nothing to offer", "new_words": [{"es": "word or phrase", "en": "short gloss"}]}`;
+  }
+
+  async function callWorker(systemPrompt, history, message) {
+    if (!CONFIG.workerUrl) throw new Error('missing-worker-url');
+    const res = await fetch(CONFIG.workerUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ systemPrompt, history, message }),
+    });
+    if (!res.ok) throw new Error('worker-status-' + res.status);
+    const raw = await res.text();
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      throw new Error('bad-json');
+    }
+  }
+
+  function friendlyError(err) {
+    const msg = err && err.message;
+    if (msg === 'missing-worker-url') return 'Falta la URL de tu Worker. Ábrela en configuración (⚙) y agrégala.';
+    if (msg === 'bad-json') return 'La respuesta no se pudo leer. Revisa que tu Worker esté devolviendo JSON.';
+    return 'No pude conectar con tu Worker. Revisa la URL y que ALLOWED_ORIGINS incluya esta página.';
+  }
+
+  async function handleUserUtterance(text) {
+    if (!text || !text.trim()) { setState('idle', 'Toca para hablar'); return; }
+    addBubble({ who: 'user', es: text });
+    const historyBefore = apiHistory.slice();
+    apiHistory.push({ role: 'user', text });
+
+    setState('thinking', 'Pensando…');
+    try {
+      const data = await callWorker(buildSystemPrompt(), historyBefore, text);
+      const replyEs = data.reply_es || '…';
+      apiHistory.push({ role: 'model', text: replyEs });
+      addBubble({ who: 'bot', es: replyEs, en: data.translation_en, correction: data.correction, correctedEs: data.corrected_es });
+      addVocabWords(data.new_words);
+      setState('speaking', 'Hablando…');
+      await speak(replyEs);
+      setState('idle', 'Toca para hablar');
+    } catch (err) {
+      addBubble({ who: 'bot', es: friendlyError(err), isError: true });
+      setState('idle', 'Toca para hablar');
+    }
+  }
+
+  // ---------- speech output ----------
+
+  let voicesCache = [];
+  function loadVoices() { voicesCache = speechSynthesis.getVoices(); }
+  if ('speechSynthesis' in window) {
+    loadVoices();
+    if ('onvoiceschanged' in speechSynthesis) speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function speak(text, rate) {
+    return new Promise((resolve) => {
+      if (!('speechSynthesis' in window)) { resolve(); return; }
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'es-MX';
+      const preferred = voicesCache.find(v => v.lang === 'es-MX')
+        || voicesCache.find(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+      if (preferred) utter.voice = preferred;
+      utter.rate = rate || 0.95;
+      utter.onend = resolve;
+      utter.onerror = resolve;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+    });
+  }
+
+  // ---------- speech input ----------
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let recognitionCallback = null;
+
+  if (SR) {
+    recognition = new SR();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (e) => {
+      const text = e.results[0][0].transcript;
+      const cb = recognitionCallback;
+      recognitionCallback = null;
+      if (cb) cb(text);
+    };
+    recognition.onerror = () => {
+      recognitionCallback = null;
+      setState('idle', 'Toca para hablar');
+    };
+    recognition.onend = () => {
+      recognitionCallback = null;
+      if (state === 'listening') setState('idle', 'Toca para hablar');
+    };
+  } else {
+    els.statusText.textContent = 'Tu navegador no soporta reconocimiento de voz — usa el cuadro de texto';
+  }
+
+  function startListening(lang, callback) {
+    if (!recognition) { callback(''); return; }
+    if (state === 'thinking' || state === 'speaking' || state === 'listening') return;
+    recognition.lang = lang;
+    recognitionCallback = callback;
+    try {
+      recognition.start();
+      setState('listening', 'Escuchando…');
+    } catch (e) { recognitionCallback = null; }
+  }
+
+  els.orbBtn.addEventListener('click', () => {
+    if (state === 'thinking' || state === 'speaking') return;
+    if (state === 'listening') { recognition && recognition.stop(); return; }
+    startListening(CONFIG.micLang, handleUserUtterance);
+  });
+
+  els.langToggle.addEventListener('click', () => {
+    CONFIG.micLang = CONFIG.micLang === 'es-MX' ? 'en-US' : 'es-MX';
+    els.langToggle.textContent = CONFIG.micLang === 'es-MX' ? 'ES' : 'EN';
+  });
+
+  function sendTyped() {
+    const text = els.textInput.value;
+    els.textInput.value = '';
+    handleUserUtterance(text);
+  }
+  els.sendBtn.addEventListener('click', sendTyped);
+  els.textInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendTyped(); });
+
+  // ---------- review ----------
+
+  els.reviewBtn.addEventListener('click', async () => {
+    if (apiHistory.length === 0) {
+      addBubble({ who: 'review', es: 'Todavía no hemos platicado nada — empieza una conversación primero.' });
+      return;
+    }
+    setState('thinking', 'Revisando…');
+    const reviewPrompt = 'You are a friendly Spanish conversation coach reviewing a practice transcript. '
+      + 'Write a short, encouraging review in English: two to four sentences focused on how clearly the learner communicated and how the conversation flowed — not a grammar audit — plus one specific, concrete tip for next time. '
+      + 'Respond ONLY with JSON in exactly this shape: {"summary": "your review text"}';
+    try {
+      const data = await callWorker(reviewPrompt, apiHistory, 'Please review my Spanish so far.');
+      addBubble({ who: 'review', es: data.summary || 'No hay suficiente información todavía.' });
+    } catch (err) {
+      addBubble({ who: 'review', es: friendlyError(err) });
+    }
+    setState('idle', 'Toca para hablar');
+  });
+
+  // ---------- init ----------
+
+  renderMissions();
+})();
+</script>
+</body>
+</html>
