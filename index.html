@@ -144,17 +144,19 @@
   }
   .lesson-banner-top .text-btn { color: var(--teal); flex-shrink: 0; }
   .lesson-words {
-    margin-top: 6px;
-    font-family: var(--font-display);
-    font-size: 13px;
-    color: var(--cream);
-    line-height: 1.5;
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
   }
+  .phrase { display: flex; flex-direction: column; }
+  .phrase-es { font-family: var(--font-display); font-size: 13px; color: var(--cream); }
+  .phrase-en { font-size: 10.5px; color: var(--muted); }
 
-  .checklist { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+  .checklist { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
   .check-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     background: none;
     border: none;
@@ -168,11 +170,14 @@
   .check-box {
     width: 14px;
     height: 14px;
+    margin-top: 2px;
     border: 1.5px solid var(--muted);
     border-radius: 4px;
     flex-shrink: 0;
     display: inline-block;
   }
+  .check-text { display: flex; flex-direction: column; gap: 1px; }
+  .check-en { font-size: 11px; color: var(--muted); font-style: italic; }
   .check-item.checked .check-box { background: var(--teal); border-color: var(--teal); }
   .check-item.checked { color: var(--muted); text-decoration: line-through; }
 
@@ -384,6 +389,8 @@
     line-height: 1.6;
   }
   .empty-state.small { margin: 8px auto; font-size: 13px; }
+  .empty-state .empty-es { font-family: var(--font-display); font-size: 16px; color: var(--cream); }
+  .empty-state .empty-en { margin-top: 6px; font-size: 12.5px; color: var(--muted); font-style: italic; }
   .bubble {
     max-width: 84%;
     padding: 12px 14px;
@@ -596,7 +603,7 @@
     </div>
 
     <div class="transcript" id="transcript">
-      <div class="empty-state" id="emptyState">Toca el círculo y saluda en español. Empieza con algo sencillo, como "Hola, ¿cómo estás?"</div>
+      <div class="empty-state" id="emptyState"><div class="empty-es">Toca el círculo y saluda en español. Empieza con algo sencillo, como "Hola, ¿cómo estás?"</div><div class="empty-en">Tap the circle and say hello in Spanish. Start with something simple, like "Hi, how are you?"</div></div>
     </div>
   </main>
 
@@ -627,22 +634,27 @@
     free: {
       context: '',
       empty: 'Toca el círculo y saluda en español. Empieza con algo sencillo, como "Hola, ¿cómo estás?"',
+      emptyEn: 'Tap the circle and say hello in Spanish. Start with something simple, like "Hi, how are you?"',
     },
     taqueria: {
       context: 'Role-play as a friendly taco stand vendor (taquero) in Mexico City. Greet the learner, ask what they would like to order, and describe menu items simply if asked (tacos al pastor, bistec, quesadillas, salsa verde or roja). Keep the conversation centered on ordering food.',
       empty: 'Estás en una taquería. Saluda al taquero y pide algo, por ejemplo: "Buenas, ¿me da dos tacos al pastor?"',
+      emptyEn: 'You are at a taco stand. Greet the vendor and order something, for example: "Hi, can I get two al pastor tacos?"',
     },
     hiking: {
       context: 'Role-play as a hiking companion chatting with the learner before a hike in the mountains. Talk about trail conditions, weather, what to bring, and simple trail small talk.',
       empty: 'Estás por salir de excursión. Saluda y platica sobre la caminata, por ejemplo: "Hola, ¿cómo está el sendero hoy?"',
+      emptyEn: 'You are about to head out on a hike. Say hello and chat about it, for example: "Hi, how is the trail today?"',
     },
     rio: {
       context: 'Role-play as a local at a river chatting with the learner, who is a fly fisherman. Talk about the river, the water, and simple fishing small talk, using accessible everyday vocabulary rather than technical jargon.',
       empty: 'Estás junto al río, listo para pescar. Saluda y platica del río, por ejemplo: "Hola, ¿cómo está el río hoy?"',
+      emptyEn: 'You are by the river, ready to fish. Say hello and chat about it, for example: "Hi, how is the river today?"',
     },
     gym: {
       context: 'Role-play as a workout buddy at a gym (gimnasio) chatting with the learner before or during a workout: simple talk about exercises, how they are feeling, and encouragement.',
       empty: 'Estás en el gimnasio. Saluda y platica del entrenamiento, por ejemplo: "¿Qué onda? ¿Qué vas a entrenar hoy?"',
+      emptyEn: 'You are at the gym. Say hello and chat about the workout, for example: "What is up? What are you training today?"',
     },
   };
 
@@ -668,8 +680,13 @@
         { es: '¿y tú?', en: 'and you?' },
         { es: 'qué bien', en: 'that is great' },
       ],
-      successCriteria: ['Dijiste tu nombre', 'Dijiste de dónde eres', 'Le preguntaste algo a la otra persona'],
+      successCriteria: [
+        { es: 'Dijiste tu nombre', en: 'You said your name' },
+        { es: 'Dijiste de dónde eres', en: 'You said where you are from' },
+        { es: 'Le preguntaste algo a la otra persona', en: 'You asked the other person something' },
+      ],
       intro: 'Vas a conocer a alguien por primera vez. Empieza, por ejemplo: "Hola, mucho gusto, me llamo..."',
+      introEn: 'You are meeting someone for the first time. Start with, for example: "Hi, nice to meet you, my name is..."',
     },
     {
       id: 'pedircomida',
@@ -683,8 +700,13 @@
         { es: '¿me trae la cuenta, por favor?', en: 'can you bring me the check, please?' },
         { es: 'para llevar', en: 'to go' },
       ],
-      successCriteria: ['Pediste al menos dos cosas', 'Preguntaste algo sobre el menú', 'Pediste la cuenta'],
+      successCriteria: [
+        { es: 'Pediste al menos dos cosas', en: 'You ordered at least two things' },
+        { es: 'Preguntaste algo sobre el menú', en: 'You asked something about the menu' },
+        { es: 'Pediste la cuenta', en: 'You asked for the check' },
+      ],
       intro: 'Estás en una taquería con hambre. Saluda y empieza a pedir, por ejemplo: "Buenas, ¿qué me recomienda?"',
+      introEn: 'You are at a taco stand and hungry. Say hello and start ordering, for example: "Hi, what do you recommend?"',
     },
     {
       id: 'direcciones',
@@ -698,8 +720,13 @@
         { es: 'a la vuelta', en: 'around the corner' },
         { es: 'muchas gracias', en: 'thank you very much' },
       ],
-      successCriteria: ['Preguntaste por un lugar específico', 'Confirmaste que entendiste', 'Agradeciste'],
+      successCriteria: [
+        { es: 'Preguntaste por un lugar específico', en: 'You asked about a specific place' },
+        { es: 'Confirmaste que entendiste', en: 'You confirmed you understood' },
+        { es: 'Agradeciste', en: 'You said thank you' },
+      ],
       intro: 'Estás perdido y necesitas ayuda. Detén a alguien, por ejemplo: "Disculpe, ¿dónde está la farmacia?"',
+      introEn: 'You are lost and need help. Stop someone, for example: "Excuse me, where is the pharmacy?"',
     },
     {
       id: 'llamada',
@@ -713,8 +740,13 @@
         { es: '¿tiene disponibilidad?', en: 'do you have availability?' },
         { es: 'nos vemos', en: 'see you then' },
       ],
-      successCriteria: ['Dijiste para qué llamabas', 'Preguntaste un detalle (hora, precio, etc.)', 'Confirmaste antes de colgar'],
+      successCriteria: [
+        { es: 'Dijiste para qué llamabas', en: 'You said why you were calling' },
+        { es: 'Preguntaste un detalle (hora, precio, etc.)', en: 'You asked a detail (time, price, etc.)' },
+        { es: 'Confirmaste antes de colgar', en: 'You confirmed before hanging up' },
+      ],
       intro: 'Vas a hacer una llamada rápida. Empieza, por ejemplo: "Bueno, buenas tardes, quisiera reservar una mesa."',
+      introEn: 'You are making a quick phone call. Start with, for example: "Hello, good afternoon, I would like to reserve a table."',
     },
     {
       id: 'problema',
@@ -727,8 +759,13 @@
         { es: 'no funciona', en: 'it does not work' },
         { es: '¿me puede ayudar?', en: 'can you help me?' },
       ],
-      successCriteria: ['Explicaste el problema con claridad', 'Pediste ayuda', 'Entendiste la respuesta'],
+      successCriteria: [
+        { es: 'Explicaste el problema con claridad', en: 'You explained the problem clearly' },
+        { es: 'Pediste ayuda', en: 'You asked for help' },
+        { es: 'Entendiste la respuesta', en: 'You understood the response' },
+      ],
       intro: 'Algo salió mal y necesitas ayuda. Empieza, por ejemplo: "Disculpe, tengo un problema."',
+      introEn: 'Something went wrong and you need help. Start with, for example: "Excuse me, I have a problem."',
     },
     {
       id: 'condicionesrio',
@@ -741,8 +778,13 @@
         { es: '¿qué está picando?', en: 'what is biting?' },
         { es: '¿hay algún lugar bueno cerca?', en: 'is there a good spot nearby?' },
       ],
-      successCriteria: ['Preguntaste por las condiciones del río', 'Preguntaste qué está picando', 'Pediste una recomendación de lugar'],
+      successCriteria: [
+        { es: 'Preguntaste por las condiciones del río', en: 'You asked about the river conditions' },
+        { es: 'Preguntaste qué está picando', en: 'You asked what is biting' },
+        { es: 'Pediste una recomendación de lugar', en: 'You asked for a spot recommendation' },
+      ],
       intro: 'Vas a platicar con un guía local antes de pescar. Empieza, por ejemplo: "Buenos días, ¿cómo está el río hoy?"',
+      introEn: 'You are going to talk with a local guide before fishing. Start with, for example: "Good morning, how is the river today?"',
     },
     {
       id: 'antesexcursion',
@@ -755,8 +797,13 @@
         { es: '¿qué debo llevar?', en: 'what should I bring?' },
         { es: '¿cuánto se tarda?', en: 'how long does it take?' },
       ],
-      successCriteria: ['Preguntaste por el clima', 'Preguntaste qué llevar', 'Preguntaste cuánto tiempo toma'],
+      successCriteria: [
+        { es: 'Preguntaste por el clima', en: 'You asked about the weather' },
+        { es: 'Preguntaste qué llevar', en: 'You asked what to bring' },
+        { es: 'Preguntaste cuánto tiempo toma', en: 'You asked how long it takes' },
+      ],
       intro: 'Vas a salir de excursión. Empieza, por ejemplo: "Hola, ¿cómo está el clima para hoy?"',
+      introEn: 'You are heading out on a hike. Start with, for example: "Hi, how is the weather today?"',
     },
     {
       id: 'compraequipo',
@@ -769,8 +816,13 @@
         { es: '¿tiene otro color o talla?', en: 'do you have another color or size?' },
         { es: 'me lo llevo', en: 'I will take it' },
       ],
-      successCriteria: ['Preguntaste si tenían el producto', 'Preguntaste el precio', 'Decidiste si comprarlo'],
+      successCriteria: [
+        { es: 'Preguntaste si tenían el producto', en: 'You asked if they had the item' },
+        { es: 'Preguntaste el precio', en: 'You asked the price' },
+        { es: 'Decidiste si comprarlo', en: 'You decided whether to buy it' },
+      ],
       intro: 'Necesitas equipo para tu próxima aventura. Empieza, por ejemplo: "Hola, ¿tiene moscas para pesca?"',
+      introEn: 'You need gear for your next adventure. Start with, for example: "Hi, do you have fishing flies?"',
     },
     {
       id: 'platicaaireLibre',
@@ -783,8 +835,13 @@
         { es: '¿algún consejo?', en: 'any tips?' },
         { es: 'buena suerte', en: 'good luck' },
       ],
-      successCriteria: ['Hiciste una pregunta sobre su día', 'Compartiste algo tuyo', 'Te despediste bien'],
+      successCriteria: [
+        { es: 'Hiciste una pregunta sobre su día', en: 'You asked about their day' },
+        { es: 'Compartiste algo tuyo', en: 'You shared something about yourself' },
+        { es: 'Te despediste bien', en: 'You said goodbye well' },
+      ],
       intro: 'Te encuentras a otra persona en el río o el sendero. Empieza, por ejemplo: "¡Qué buen día! ¿Cómo va todo?"',
+      introEn: 'You run into someone else on the river or trail. Start with, for example: "What a great day! How is it going?"',
     },
     {
       id: 'antesentrenar',
@@ -797,8 +854,13 @@
         { es: 'vamos con todo', en: 'let us go all out' },
         { es: 'una más', en: 'one more' },
       ],
-      successCriteria: ['Dijiste qué ibas a entrenar', 'Preguntaste algo a la otra persona', 'Usaste una frase de ánimo'],
+      successCriteria: [
+        { es: 'Dijiste qué ibas a entrenar', en: 'You said what you were going to train' },
+        { es: 'Preguntaste algo a la otra persona', en: 'You asked the other person something' },
+        { es: 'Usaste una frase de ánimo', en: 'You used an encouraging phrase' },
+      ],
       intro: 'Estás en el gimnasio antes de entrenar. Empieza, por ejemplo: "¿Qué onda? ¿Qué vas a entrenar hoy?"',
+      introEn: 'You are at the gym before training. Start with, for example: "What is up? What are you training today?"',
     },
     {
       id: 'membresia',
@@ -810,8 +872,13 @@
         { es: '¿cuánto cuesta la membresía?', en: 'how much does membership cost?' },
         { es: '¿puedo probar una clase?', en: 'can I try a class?' },
       ],
-      successCriteria: ['Preguntaste por una clase específica', 'Preguntaste el precio', 'Preguntaste el horario'],
+      successCriteria: [
+        { es: 'Preguntaste por una clase específica', en: 'You asked about a specific class' },
+        { es: 'Preguntaste el precio', en: 'You asked the price' },
+        { es: 'Preguntaste el horario', en: 'You asked the schedule' },
+      ],
       intro: 'Quieres inscribirte a una clase. Empieza, por ejemplo: "Hola, ¿tienen clases de kettlebell?"',
+      introEn: 'You want to sign up for a class. Start with, for example: "Hi, do you have kettlebell classes?"',
     },
     {
       id: 'lesion',
@@ -824,8 +891,13 @@
         { es: 'debería descansar', en: 'I should rest' },
         { es: '¿qué me recomienda?', en: 'what do you recommend?' },
       ],
-      successCriteria: ['Dijiste qué te duele', 'Diste un detalle (cuándo, cómo)', 'Pediste una recomendación'],
+      successCriteria: [
+        { es: 'Dijiste qué te duele', en: 'You said what hurts' },
+        { es: 'Diste un detalle (cuándo, cómo)', en: 'You gave a detail (when, how)' },
+        { es: 'Pediste una recomendación', en: 'You asked for a recommendation' },
+      ],
       intro: 'Algo te duele después de entrenar. Empieza, por ejemplo: "Me duele el hombro desde ayer."',
+      introEn: 'Something hurts after training. Start with, for example: "My shoulder has hurt since yesterday."',
     },
     {
       id: 'conocergente',
@@ -838,8 +910,13 @@
         { es: 'qué padre', en: 'that is cool' },
         { es: 'deberíamos...', en: 'we should...' },
       ],
-      successCriteria: ['Te presentaste', 'Preguntaste algo sobre la otra persona', 'Sugeriste algo'],
+      successCriteria: [
+        { es: 'Te presentaste', en: 'You introduced yourself' },
+        { es: 'Preguntaste algo sobre la otra persona', en: 'You asked something about the other person' },
+        { es: 'Sugeriste algo', en: 'You suggested something' },
+      ],
       intro: 'Conoces a alguien en una reunión. Empieza, por ejemplo: "Hola, mucho gusto, me llamo..."',
+      introEn: 'You meet someone at a gathering. Start with, for example: "Hi, nice to meet you, my name is..."',
     },
     {
       id: 'llamadaamigo',
@@ -852,8 +929,13 @@
         { es: 'deberíamos vernos', en: 'we should get together' },
         { es: 'te marco luego', en: 'I will call you later' },
       ],
-      successCriteria: ['Preguntaste cómo está', 'Compartiste algo tuyo', 'Propusiste un plan'],
+      successCriteria: [
+        { es: 'Preguntaste cómo está', en: 'You asked how they are' },
+        { es: 'Compartiste algo tuyo', en: 'You shared something about yourself' },
+        { es: 'Propusiste un plan', en: 'You proposed a plan' },
+      ],
       intro: 'Le llamas a un amigo para saludar. Empieza, por ejemplo: "¿Qué onda? ¿Cómo has estado?"',
+      introEn: 'You call a friend to say hello. Start with, for example: "What is up? How have you been?"',
     },
   ];
 
@@ -972,7 +1054,9 @@
   function renderChecklist(mission) {
     els.missionChecklist.innerHTML = mission.successCriteria.map((c, i) =>
       '<button class="check-item' + (checkedCriteria.has(i) ? ' checked' : '') + '" data-idx="' + i + '">'
-      + '<span class="check-box"></span>' + escapeHtml(c) + '</button>'
+      + '<span class="check-box"></span>'
+      + '<span class="check-text"><span class="check-es">' + escapeHtml(c.es) + '</span><span class="check-en">' + escapeHtml(c.en) + '</span></span>'
+      + '</button>'
     ).join('');
   }
 
@@ -989,7 +1073,9 @@
     if (CONFIG.mode !== 'mission' || !mission) { els.missionBanner.hidden = true; return; }
     els.missionBanner.hidden = false;
     els.missionTitle.textContent = 'Misión ' + (MISSIONS.indexOf(mission) + 1) + ' · ' + mission.title;
-    els.missionPhrases.textContent = mission.keyPhrases.map((p) => p.es).join(' · ');
+    els.missionPhrases.innerHTML = mission.keyPhrases.map((p) =>
+      '<span class="phrase"><span class="phrase-es">' + escapeHtml(p.es) + '</span><span class="phrase-en">' + escapeHtml(p.en) + '</span></span>'
+    ).join('');
     renderChecklist(mission);
   }
 
@@ -1023,7 +1109,7 @@
     completedMissions.add(CONFIG.missionId);
     renderMissions();
     setState('thinking', 'Revisando…');
-    const criteriaList = mission.successCriteria.map((c, i) => (i + 1) + '. ' + c).join(' ');
+    const criteriaList = mission.successCriteria.map((c, i) => (i + 1) + '. ' + c.en).join(' ');
     const debriefPrompt = 'You are a friendly Spanish conversation coach reviewing whether a learner completed a real-world speaking task. '
       + 'The task was: ' + mission.objective + ' '
       + 'Success looks like: ' + criteriaList + ' '
@@ -1046,7 +1132,10 @@
     apiHistory = [];
     els.transcript.innerHTML = '';
     const mission = CONFIG.mode === 'mission' ? findMission(CONFIG.missionId) : null;
-    els.emptyState.textContent = mission ? mission.intro : SCENARIOS[CONFIG.scenario].empty;
+    const introEs = mission ? mission.intro : SCENARIOS[CONFIG.scenario].empty;
+    const introEnText = mission ? mission.introEn : SCENARIOS[CONFIG.scenario].emptyEn;
+    els.emptyState.innerHTML = '<div class="empty-es">' + escapeHtml(introEs) + '</div>'
+      + (introEnText ? '<div class="empty-en">' + escapeHtml(introEnText) + '</div>' : '');
     els.emptyState.hidden = false;
     els.transcript.appendChild(els.emptyState);
   }
